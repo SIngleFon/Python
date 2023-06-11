@@ -18,7 +18,7 @@ def count(text):
     return res
 
 def rythm(rythm):
-    if len(set(rythm)) == 1:
+    if rythm[0] != 0 and len(set(rythm)) == 1:
         print('Парам пам-пам')
     else: print('Пам парам')
 
