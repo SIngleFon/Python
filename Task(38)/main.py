@@ -19,6 +19,12 @@ def read_records():
             return all_data
     return []
 
+def check_int(msg):
+    while True:
+        try:
+            return int(input(msg))
+        except (TypeError,ValueError):
+            print("Error, you did not enter a number")
 
 def show_all():
     if all_data:
@@ -26,6 +32,21 @@ def show_all():
     else:
         print("Empty data")
 
+def check_record(string):
+    global all_data
+    baby = string.split(" ")
+    test = []
+    for i in range(4):
+        copy = all_data[i][1:].split()
+        count = 0
+        for j in range(4):
+            
+            if baby[j].lower() in copy[j].lower():
+                count += 1
+        test.append(count)
+    if max(test) == 4 or set(baby) == " ":
+        return False
+    else: return True
 
 def add_new_contact():
     global last_id
@@ -33,11 +54,20 @@ def add_new_contact():
     string = ""
     for i in array:
         string += input(f"Enter {i} ") + " "
-    last_id += 1
+    last_id += 1  
+    if string == "    ":
+        print("Вы ничего не ввели")
+    else:
+        if check_record(string) == True:
+            with open(file_base, "a", encoding="utf-8") as f:
+                f.write(f"{last_id} {string}\n")
+            print(f"==============\n"
+                  "Контакт успешно добавлен!")
+        else:
+            print(f"==============\n"
+                    "Такой контакт уже есть, Либо вы ничего не ввели")
 
-    with open(file_base, "a", encoding="utf-8") as f:
-        f.write(f"{last_id} {string}\n")
-        
+            
 
 def search_record():
     search = input("Search: ").lower()
@@ -58,9 +88,15 @@ def change_record():
     add_new_contact()
 
 def delete_record(id):
-    global last_id
+    global last_id, all_data
     search_record()
-    id = int(input("Select and write id to change/remove: "))
+    while True:
+        # id = int(input("Select and write id to change/remove: "))
+        id = check_int("Select and write id to change/remove: ")
+        if id > len(all_data):
+            print("Error, enter the correct ID")
+        else:
+            break
     with open(file_base, encoding="utf-8") as f:
         all_data = [i.strip() for i in f]
     with open(file_base,"w", encoding="utf-8") as f:
@@ -88,30 +124,36 @@ def export_import():
                         "You're choice: "))
     match UserKey:
         case 1:
-            new_file_name = input("Write name new file: ") + ".txt"
-            if not path.exists(new_file_name):
-                with open(new_file_name, "a+", encoding="utf-8") as f:
-                    for line in all_data:
-                        f.write(f"{line}\n")
-            else: 
-                with open(new_file_name, "w", encoding="utf-8") as f:
-                    for line in all_data:
-                        f.write(f"{line}\n")
+            export_record()
         case 0:
-            file_name_import = input("Write name importing file: ") + ".txt"
-            if not path.exists(file_name_import):
-                print("File not matched\n"
-                      "Try Again!")
-            copy_data = []
-            with open(file_name_import, encoding="utf-8") as f:
-                copy_data = [i.strip() for i in f]
-            all_data = all_data + copy_data
-            print(all_data)
-            with open(file_base, "a", encoding="utf-8") as f:
-                for line in copy_data:
-                    f.write(f"{line}\n")
+            import_record()
         case _:
             print("Try again!\n")    
+
+def export_record():
+    new_file_name = input("Write name new file: ") + ".txt"
+    if not path.exists(new_file_name):
+        with open(new_file_name, "a+", encoding="utf-8") as f:
+            for line in all_data:
+                f.write(f"{line}\n")
+    else: 
+        with open(new_file_name, "w", encoding="utf-8") as f:
+            for line in all_data:
+                f.write(f"{line}\n")
+
+def import_record():
+    file_name_import = input("Write name importing file: ") + ".txt"
+    if not path.exists(file_name_import):
+        print("File not matched\n"
+            "Try Again!")
+    copy_data = []
+    with open(file_name_import, encoding="utf-8") as f:
+        copy_data = [i.strip() for i in f]
+    all_data = all_data + copy_data
+    print(all_data)
+    with open(file_base, "a", encoding="utf-8") as f:
+        for line in copy_data:
+            f.write(f"{line}\n")
 
 def main_menu():
     play = True
